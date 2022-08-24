@@ -101,11 +101,21 @@ public class OrderController {
         return orderRepository.findAll();
     }
 
-    @PatchMapping("/order/{id}/{status}")
-    public ResponseEntity<?> setOrderStatus(@PathVariable Long id, @PathVariable String status){
+    @PatchMapping("/order/{orderId}/{status}")
+    public ResponseEntity<?> setOrderStatus(@PathVariable Long orderId, @PathVariable String status){
         try {
-            //TODO switch by status -> on paid calculate totalPrice
-            orderRepository.updateOrderStatus(id, status);
+            Double totalPrice = null;
+            switch (status){
+                case "paid":
+                    List<OrderItem> orderItems = orderItemRepository.findOrderItemByOrderId(orderId);
+                    totalPrice = 0.0;
+                    for(OrderItem orderItem: orderItems) {
+                        totalPrice += orderItem.getQuantity()*orderItem.getItem().getPrice();
+                    }
+
+                    break;
+            }
+            orderRepository.updateOrderStatus(orderId, status, totalPrice);
         } catch (Exception ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

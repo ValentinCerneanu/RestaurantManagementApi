@@ -13,6 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     @Modifying
     @Transactional
-    @Query("UPDATE order_t u set u.status = :status where u.id = :id")
-    void updateOrderStatus(@Param("id") Long id, @Param("status") String status);
+    @Query("UPDATE order_t u set u.status = :status, u.totalPrice = :totalPrice where u.id = :id")
+    void updateOrderStatus(@Param("id") Long id, @Param("status") String status, @Param("totalPrice") Double totalPrice);
 }

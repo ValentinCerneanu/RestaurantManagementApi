@@ -19,7 +19,6 @@ public class OrderController {
     private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
 
-
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     OrderController(OrderRepository orderRepository,

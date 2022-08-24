@@ -30,9 +30,11 @@ public class SecurityConfig {
         */
         http.authorizeRequests()
                 //.mvcMatchers("/menu").permitAll()
-                .mvcMatchers(HttpMethod.POST, "/menu").hasAuthority("SCOPE_write:menu")
-                .mvcMatchers("/menu/**").authenticated()
+                .mvcMatchers(HttpMethod.POST, "/**").hasAuthority("SCOPE_write:menu")
+                .mvcMatchers(HttpMethod.PATCH, "/**").hasAuthority("SCOPE_write:menu")
+                .mvcMatchers("/item/**").authenticated()
                 .mvcMatchers("/order/**").authenticated()
+                .mvcMatchers("/waiter/**").authenticated()
                 .and().cors()
                 .and().oauth2ResourceServer().jwt();
         return http.build();

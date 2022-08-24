@@ -4,7 +4,6 @@ import com.resturant.management.models.Item;
 import com.resturant.management.repositories.ItemRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -15,11 +14,9 @@ import java.util.Optional;
 public class ItemController {
 
     private final ItemRepository repository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    ItemController(ItemRepository repository, KafkaTemplate<String, String> kafkaTemplate) {
+    ItemController(ItemRepository repository) {
         this.repository = repository;
-        this.kafkaTemplate = kafkaTemplate;
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -46,12 +43,6 @@ public class ItemController {
 
     @GetMapping("/item/{id}")
     public ResponseEntity<?> getItemById(@PathVariable Long id){
-//        try{
-//            kafkaTemplate.send("Hello-Kafka", "new request on get item/id");
-//            kafkaTemplate.flush();
-//        }catch (Exception ex){
-//            ex.printStackTrace();
-//        }
         Optional<Item> result = repository.findById(id);
         if(result.isPresent())
             return ResponseEntity.status(HttpStatus.OK).body(result.get());

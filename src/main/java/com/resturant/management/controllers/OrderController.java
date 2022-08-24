@@ -36,6 +36,13 @@ public class OrderController {
     public ResponseEntity<?> postOrder(@RequestBody Order newOrder) {
         try {
             Order order = orderRepository.save(newOrder);
+
+            try{
+                kafkaTemplate.send("new_order", order.toString());
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
+
             return ResponseEntity.status(HttpStatus.CREATED).body(order);
         }catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad value");
@@ -62,6 +69,13 @@ public class OrderController {
             newOrderItem.setItem(item.get());
 
             OrderItem orderItem = orderItemRepository.save(newOrderItem);
+
+            try{
+                kafkaTemplate.send("new_added_items_on_order", orderItem.toString());
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
+
             return ResponseEntity.status(HttpStatus.CREATED).body(orderItem);
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad value");
@@ -82,12 +96,6 @@ public class OrderController {
 
     @GetMapping("/order/{id}")
     public ResponseEntity<?> getOrderById(@PathVariable Long id){
-//        try{
-//            kafkaTemplate.send("Hello-Kafka", "new request on get order/id");
-//            kafkaTemplate.flush();
-//        } catch (Exception ex){
-//            ex.printStackTrace();
-//        }
         Optional<Order> result = orderRepository.findById(id);
         if(result.isPresent())
             return ResponseEntity.status(HttpStatus.OK).body(result.get());
@@ -115,6 +123,12 @@ public class OrderController {
                     break;
             }
             orderRepository.updateOrderStatus(orderId, status, totalPrice);
+            try{
+                Order order = orderRepository.findById(orderId).get();
+                kafkaTemplate.send("changed_order_status", order.toString());
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
         } catch (Exception ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

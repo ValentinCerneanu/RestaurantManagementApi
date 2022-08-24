@@ -1,5 +1,8 @@
 package com.resturant.management.models;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -125,4 +128,27 @@ public class Order {
     public void setOrderItems(List<OrderItem> orderItems) {
         this.orderItems = orderItems;
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", totalPrice=" + totalPrice +
+                ", waiter=" + waiter +
+                ", status='" + status + '\'' +
+                ", tableId='" + tableId + '\'' +
+                ", orderItems=" + orderItems +
+                '}';
+    }
+//
+//    public String getAsJson(){
+//        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+//        String json = null;
+//        try{
+//            json = ow.writeValueAsString(this);
+//        } catch (Exception ex){
+//            ex.printStackTrace();
+//        }
+//        return json;
+//    }
 }

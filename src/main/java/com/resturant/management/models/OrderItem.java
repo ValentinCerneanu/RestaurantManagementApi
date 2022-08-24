@@ -1,6 +1,8 @@
 package com.resturant.management.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import javax.persistence.*;
 
@@ -102,4 +104,26 @@ public class OrderItem {
     public void setComment(String commentary) {
         this.comment = commentary;
     }
+
+    @Override
+    public String toString() {
+        return "OrderItem{" +
+                "id=" + id +
+                ", item=" + item +
+                ", order=" + order +
+                ", quantity=" + quantity +
+                ", comment='" + comment + '\'' +
+                '}';
+    }
+
+//    public String getAsJson(){
+//        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+//        String json = null;
+//        try{
+//            json = ow.writeValueAsString(this);
+//        } catch (Exception ex){
+//            ex.printStackTrace();
+//        }
+//        return json;
+//    }
 }

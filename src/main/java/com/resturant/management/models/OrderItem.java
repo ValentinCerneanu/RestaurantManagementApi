@@ -1,9 +1,12 @@
 package com.resturant.management.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity(name = "order_item")
 public class OrderItem {
+    @JsonIgnore
     @Id
     @SequenceGenerator(
             name="order_item_sequence",
@@ -22,47 +25,50 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(
-            name = "menu_item",
+            name = "item",
             nullable = false,
             referencedColumnName = "id",
             foreignKey = @ForeignKey(
-                    name = "menu_item_fk"
+                    name = "item_fk"
             )
     )
-    private MenuItem menuItem;
+    private Item item;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(
-            name = "order_item",
+            name = "order_id",
             nullable = false,
             referencedColumnName = "id",
             foreignKey = @ForeignKey(
-                    name = "order_item_fk"
+                    name = "order_fk"
             )
     )
-    private MenuOrder menuOrder;
-    private int quantity;
+    private Order order;
 
-    public OrderItem(MenuOrder menuOrder, MenuItem menuItem, int quantity) {
-        this.menuOrder = menuOrder;
-        this.menuItem = menuItem;
+    private int quantity;
+    private String comment;
+
+    public OrderItem(Order order, Item item, int quantity) {
+        this.order = order;
+        this.item = item;
         this.quantity = quantity;
     }
 
-    public OrderItem(MenuItem menuItem, int quantity) {
-        this.menuItem = menuItem;
+    public OrderItem(Item item, int quantity) {
+        this.item = item;
         this.quantity = quantity;
     }
 
     public OrderItem() {
     }
 
-    public MenuItem getMenuItem() {
-        return menuItem;
+    public Item getItem() {
+        return item;
     }
 
-    public void setMenuItem(MenuItem menuItem) {
-        this.menuItem = menuItem;
+    public void setItem(Item item) {
+        this.item = item;
     }
 
     public int getQuantity() {
@@ -81,11 +87,19 @@ public class OrderItem {
         this.id = id;
     }
 
-    public MenuOrder getMenuOrder() {
-        return menuOrder;
+    public Order getOrder() {
+        return order;
     }
 
-    public void setMenuOrder(MenuOrder menuOrder) {
-        this.menuOrder = menuOrder;
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String commentary) {
+        this.comment = commentary;
     }
 }

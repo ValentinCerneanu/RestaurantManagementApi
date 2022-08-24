@@ -1,6 +1,6 @@
 package com.resturant.management.repositories;
 
-import com.resturant.management.models.MenuOrder;
+import com.resturant.management.models.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 @Repository
-public interface OrderRepository extends JpaRepository<MenuOrder, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long> {
     @Modifying
     @Transactional
-    @Query("UPDATE menu_order u set u.status = :status where u.id = :id")
+    @Query("UPDATE order_t u set u.status = :status where u.id = :id")
     void updateOrderStatus(@Param("id") Long id, @Param("status") String status);
 }

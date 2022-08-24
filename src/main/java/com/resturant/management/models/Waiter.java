@@ -48,7 +48,7 @@ public class Waiter {
             cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
             fetch = FetchType.LAZY
     )
-    private List<MenuOrder> orders = new ArrayList<>();
+    private List<Order> orders = new ArrayList<>();
 
     public Waiter(String firstName, String lastName) {
         this.firstName = firstName;

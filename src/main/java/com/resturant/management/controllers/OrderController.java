@@ -1,8 +1,9 @@
 package com.resturant.management.controllers;
 
-import com.resturant.management.models.MenuOrder;
-import com.resturant.management.models.ProjectionOrderItem;
+import com.resturant.management.models.Item;
+import com.resturant.management.models.Order;
 import com.resturant.management.models.OrderItem;
+import com.resturant.management.repositories.ItemRepository;
 import com.resturant.management.repositories.OrderItemRepository;
 import com.resturant.management.repositories.OrderRepository;
 import org.springframework.http.HttpStatus;
@@ -16,23 +17,26 @@ import java.util.*;
 public class OrderController {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final ItemRepository itemRepository;
 
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     OrderController(OrderRepository orderRepository,
                     OrderItemRepository orderItemRepository,
+                    ItemRepository itemRepository,
                     KafkaTemplate<String, String> kafkaTemplate) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.itemRepository = itemRepository;
         this.kafkaTemplate = kafkaTemplate;
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/order")
-    public ResponseEntity<?> postOrder(@RequestBody MenuOrder newOrder) {
+    public ResponseEntity<?> postOrder(@RequestBody Order newOrder) {
         try {
-            MenuOrder order = orderRepository.save(newOrder);
+            Order order = orderRepository.save(newOrder);
             return ResponseEntity.status(HttpStatus.CREATED).body(order);
         }catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad value");
@@ -40,11 +44,26 @@ public class OrderController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/order/{id}/addOrderItems")
-    public ResponseEntity<?> postOrderItems(@RequestBody OrderItem newOrderItem) {
+    @PostMapping("/order/{orderId}/addOrderItems/{itemId}")
+    public ResponseEntity<?> postOrderItems(@PathVariable Long orderId,
+                                            @PathVariable Long itemId,
+                                            @RequestBody OrderItem newOrderItem) {
         try {
-            OrderItem order = orderItemRepository.save(newOrderItem);
-            return ResponseEntity.status(HttpStatus.CREATED).body(order);
+            Optional<Order> order = orderRepository.findById(orderId);
+            if(order.isEmpty())
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order with id " + orderId + " not found");
+
+            newOrderItem.setOrder(order.get());
+
+            Optional<Item> item = itemRepository.findById(itemId);
+
+            if(item.isEmpty())
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item with id " + itemId + " not found");
+
+            newOrderItem.setItem(item.get());
+
+            OrderItem orderItem = orderItemRepository.save(newOrderItem);
+            return ResponseEntity.status(HttpStatus.CREATED).body(orderItem);
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad value");
         }
@@ -53,7 +72,9 @@ public class OrderController {
     @GetMapping("/order/{orderId}/getOrderItems")
     public ResponseEntity<?> getOrderItems(@PathVariable Long orderId) {
         try {
-            List<ProjectionOrderItem> orderItems = orderItemRepository.findOrderItemByOrderId(orderId);
+            if(orderRepository.findById(orderId).isEmpty())
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order with id " + orderId + " not found");
+            List<OrderItem> orderItems = orderItemRepository.findOrderItemByOrderId(orderId);
             return ResponseEntity.status(HttpStatus.OK).body(orderItems);
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad value");
@@ -68,7 +89,7 @@ public class OrderController {
 //        } catch (Exception ex){
 //            ex.printStackTrace();
 //        }
-        Optional<MenuOrder> result = orderRepository.findById(id);
+        Optional<Order> result = orderRepository.findById(id);
         if(result.isPresent())
             return ResponseEntity.status(HttpStatus.OK).body(result.get());
         else
@@ -76,13 +97,14 @@ public class OrderController {
     }
 
     @GetMapping("/order")
-    public List<MenuOrder> getAllOrders(){
+    public List<Order> getAllOrders(){
         return orderRepository.findAll();
     }
 
     @PatchMapping("/order/{id}/{status}")
     public ResponseEntity<?> setOrderStatus(@PathVariable Long id, @PathVariable String status){
         try {
+            //TODO switch by status -> on paid calculate totalPrice
             orderRepository.updateOrderStatus(id, status);
         } catch (Exception ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

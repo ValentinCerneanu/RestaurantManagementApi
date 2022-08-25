@@ -94,4 +94,13 @@ public class Item {
         this.price = price;
     }
 
+    @Override
+    public String toString() {
+        return "Item{" +
+                "id=" + id +
+                ", category='" + category + '\'' +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                '}';
+    }
 }

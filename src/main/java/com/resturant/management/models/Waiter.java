@@ -81,4 +81,14 @@ public class Waiter {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
+    @Override
+    public String toString() {
+        return "Waiter{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", orders=" + orders +
+                '}';
+    }
 }

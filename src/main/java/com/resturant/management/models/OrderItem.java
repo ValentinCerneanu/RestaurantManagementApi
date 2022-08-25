@@ -110,7 +110,7 @@ public class OrderItem {
         return "OrderItem{" +
                 "id=" + id +
                 ", item=" + item +
-                ", order=" + order +
+                ", orderId=" + order.getId() +
                 ", quantity=" + quantity +
                 ", comment='" + comment + '\'' +
                 '}';

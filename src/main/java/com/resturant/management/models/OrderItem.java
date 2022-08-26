@@ -50,6 +50,7 @@ public class OrderItem {
 
     private int quantity;
     private String comment;
+    private String status;
 
     public OrderItem(Order order, Item item, int quantity) {
         this.order = order;
@@ -103,6 +104,14 @@ public class OrderItem {
 
     public void setComment(String commentary) {
         this.comment = commentary;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.resturant.management.controllers;
 import com.resturant.management.models.Item;
 import com.resturant.management.models.Order;
 import com.resturant.management.models.OrderItem;
+import com.resturant.management.models.OrderItemExtension;
 import com.resturant.management.repositories.ItemRepository;
 import com.resturant.management.repositories.OrderItemRepository;
 import com.resturant.management.repositories.OrderRepository;
@@ -87,7 +88,7 @@ public class OrderController {
         try {
             if(orderRepository.findById(orderId).isEmpty())
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order with id " + orderId + " not found");
-            List<OrderItem> orderItems = orderItemRepository.findOrderItemByOrderId(orderId);
+            List<OrderItem> orderItems = orderItemRepository.findOrderItemsByOrderId(orderId);
             return ResponseEntity.status(HttpStatus.OK).body(orderItems);
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad value");
@@ -114,7 +115,7 @@ public class OrderController {
             Double totalPrice = null;
             switch (status){
                 case "paid":
-                    List<OrderItem> orderItems = orderItemRepository.findOrderItemByOrderId(orderId);
+                    List<OrderItem> orderItems = orderItemRepository.findOrderItemsByOrderId(orderId);
                     totalPrice = 0.0;
                     for(OrderItem orderItem: orderItems) {
                         totalPrice += orderItem.getQuantity()*orderItem.getItem().getPrice();
@@ -126,6 +127,36 @@ public class OrderController {
             try{
                 Order order = orderRepository.findById(orderId).get();
                 kafkaTemplate.send("changed_order_status", order.toString());
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
+        } catch (Exception ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PatchMapping("/order/{orderId}/item/{itemId}/{status}")
+    public ResponseEntity<?> setOrderStatus(@PathVariable Long orderId,
+                                            @PathVariable Long itemId,
+                                            @PathVariable String status){
+        try {
+            if(!orderItemRepository.existsById(itemId) || !orderRepository.existsById(orderId))
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order Id or Item id not found");
+
+            orderItemRepository.updateOrderItemStatus(itemId, status);
+            OrderItem orderItem = orderItemRepository.findById(itemId).get();
+            try{
+                Order order = orderRepository.findById(orderId).get();
+
+                OrderItemExtension orderItemExtension = new OrderItemExtension(
+                        orderItem,
+                        orderId,
+                        order.getTable(),
+                        order.getWaiter(),
+                        order.getStatus());
+
+                kafkaTemplate.send("changed_item_status", orderItemExtension.toString());
             } catch (Exception ex){
                 ex.printStackTrace();
             }

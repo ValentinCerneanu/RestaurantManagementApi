@@ -88,7 +88,6 @@ public class Waiter {
                 "id=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", orders=" + orders +
                 '}';
     }
 }
